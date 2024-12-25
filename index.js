@@ -14,7 +14,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.jd7el.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -67,9 +67,22 @@ app.post('/assignments', async (req, res) => {
   }
 })
 
-app.delete('/assignments/:id', async (req, res) => {
-  
-})
+app.delete("/assignments/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await assignmentsCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 1) {
+      res.status(200).json({ message: "Assignment deleted successfully" });
+    } else {
+      res.status(404).json({ message: "Assignment not found" });
+    }
+  } catch (error) {
+    console.error("Error deleting assignment:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
