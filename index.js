@@ -27,6 +27,7 @@ const client = new MongoClient(uri, {
 });
 
 let assignmentsCollection;
+let submissionsCollection;
 
 // Connect to MongoDB and initialize the assignments collection
 async function connectToMongoDB() {
@@ -34,6 +35,7 @@ async function connectToMongoDB() {
     await client.connect();
     console.log('Connected to MongoDB successfully!');
     assignmentsCollection = client.db('group-study').collection('assignments');
+    submissionsCollection = client.db('group-study').collection('submissions');
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
   }
@@ -66,7 +68,16 @@ app.post('/assignments', async (req, res) => {
     console.log(e)
   }
 })
-
+app.get("/assignments/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const result = await assignmentsCollection.findOne({ _id: new ObjectId(id) })
+    res.send(result)
+  } catch (error) {
+    console.error("Error getting a assignment:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+})
 app.delete("/assignments/:id", async (req, res) => {
   const { id } = req.params;
 
@@ -83,6 +94,46 @@ app.delete("/assignments/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+
+// ----------------------------submissions api---------------------
+app.get('/submissions', async (req, res) => {
+  const email = req.query?.email;
+  const status = req.query?.status;
+  const query = {};
+  if (email) query.userEmail = email;
+  if(status) query.status = status
+  try {
+    const cursor = submissionsCollection.find(query);
+    const result = await cursor.toArray();
+    res.send(result);
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).send('Error fetching assignments');
+  }
+});
+app.post('/submissions', async (req, res) => {
+  try {
+    const data = req.body;
+    const result = await submissionsCollection.insertOne(data);
+    res.send(result)
+  } catch (e) {
+    console.log(e)
+  }
+})
+app.patch('/submissions/:id', async (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+    $set: {
+      status: data.status,
+      obtainedMarks : data.obtainedMarks,
+      feedback: data.feedback
+    }
+  }
+  const result = await submissionsCollection.updateOne(filter, updatedDoc);
+  res.send(result)
+})
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
