@@ -94,6 +94,26 @@ app.delete("/assignments/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+app.put('/assignments/:id', async (req, res) => {
+  try {
+    const { id } = req.params; 
+    const updatedData = req.body; 
+
+    const result = await assignmentsCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedData }
+    );
+
+    if (result.modifiedCount > 0) {
+      res.status(200).send({ message: "Assignment updated successfully", result });
+    } else {
+      res.status(404).send({ message: "Assignment not found or no changes made" });
+    }
+  } catch (e) {
+    console.error("Error updating assignment:", e);
+    res.status(500).send({ message: "Failed to update assignment" });
+  }
+});
 
 // ----------------------------submissions api---------------------
 app.get('/submissions', async (req, res) => {
