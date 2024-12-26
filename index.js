@@ -36,8 +36,8 @@ let submissionsCollection;
 // Connect to MongoDB and initialize the assignments collection
 async function connectToMongoDB() {
   try {
-    await client.connect();
-    console.log('Connected to MongoDB successfully!');
+    // await client.connect();
+    // console.log('Connected to MongoDB successfully!');
     assignmentsCollection = client.db('group-study').collection('assignments');
     submissionsCollection = client.db('group-study').collection('submissions');
   } catch (error) {
