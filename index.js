@@ -72,11 +72,18 @@ app.post('/jwt', async (req, res) => {
   res
     .cookie('token', token, {
       httpOnly: true,
-      secure: false, //for localhost
+      secure: process.env.NODE_ENV === 'production'
     })
     .send({ success: true })
 
 });
+app.post('/logout', (req, res) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production'
+  })
+  .send({success : true})
+})
 // Define routes
 app.get('/', (req, res) => {
   res.send('Welcome to the Express.js server!');
