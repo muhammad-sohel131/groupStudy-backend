@@ -50,7 +50,13 @@ app.get('/', (req, res) => {
 
 app.get('/assignments', async (req, res) => {
   try {
-    const cursor = assignmentsCollection.find();
+    const { difficulty, search } = req.query;
+
+    const filter = {};
+    if (difficulty) filter.difficulty = difficulty;
+    if (search) filter.title = { $regex: search, $options: 'i' };
+
+    const cursor = assignmentsCollection.find(filter);
     const result = await cursor.toArray();
     res.send(result);
   } catch (error) {
