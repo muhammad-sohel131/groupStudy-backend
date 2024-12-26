@@ -9,8 +9,8 @@ const PORT = process.env.PORT || 3000;
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://job-portal-504b7.web.app',
-    'https://job-portal-504b7.firebaseapp.com'
+    'https://group-study-b6d75.web.app',
+    'https://group-study-b6d75.firebaseapp.com'
   ],
   credentials: true
 }));
@@ -51,12 +51,12 @@ connectToMongoDB();
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
   if (!token) {
-    return res.status(401).send({ message: 'unAuthorized access' })
+    return res.status(401).send({ message: 'unAuthorized access!!' })
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: 'unauthorized access' })
+      return res.status(401).send({ message: 'unauthorized access!' })
     }
     req.user = decoded;
     next();
@@ -99,7 +99,7 @@ app.get('/assignments', async (req, res) => {
   }
 });
 
-app.post('/assignments', async (req, res) => {
+app.post('/assignments', verifyToken, async (req, res) => {
   try {
     const data = req.body;
     const result = await assignmentsCollection.insertOne(data);
@@ -108,7 +108,7 @@ app.post('/assignments', async (req, res) => {
     console.log(e)
   }
 })
-app.get("/assignments/:id", async (req, res) => {
+app.get("/assignments/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await assignmentsCollection.findOne({ _id: new ObjectId(id) })
@@ -118,7 +118,7 @@ app.get("/assignments/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 })
-app.delete("/assignments/:id", async (req, res) => {
+app.delete("/assignments/:id", verifyToken, async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -139,7 +139,7 @@ app.delete("/assignments/:id", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
-app.put('/assignments/:id', async (req, res) => {
+app.put('/assignments/:id', verifyToken, async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
@@ -186,7 +186,7 @@ app.get('/submissions', verifyToken, async (req, res) => {
     res.status(500).send('Error fetching assignments');
   }
 });
-app.post('/submissions', async (req, res) => {
+app.post('/submissions', verifyToken, async (req, res) => {
   try {
     const data = req.body;
     const result = await submissionsCollection.insertOne(data);
@@ -195,7 +195,7 @@ app.post('/submissions', async (req, res) => {
     console.log(e)
   }
 })
-app.patch('/submissions/:id', async (req, res) => {
+app.patch('/submissions/:id', verifyToken, async (req, res) => {
   const id = req.params.id;
   const data = req.body;
   const filter = { _id: new ObjectId(id) };
