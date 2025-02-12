@@ -51,7 +51,7 @@ connectToMongoDB();
 const verifyToken = (req, res, next) => {
   const token = req?.cookies?.token;
   if (!token) {
-    return res.status(401).send({ message: 'unAuthorized access!!' })
+    return res.status(401).send({ message: 'Login to get perform!' })
   }
 
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
@@ -67,7 +67,7 @@ const verifyToken = (req, res, next) => {
 // Auth related APIs
 app.post('/jwt', async (req, res) => {
   const user = req.body;
-  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10hr' });
 
   res
     .cookie('token', token, {
@@ -76,7 +76,6 @@ app.post('/jwt', async (req, res) => {
       sameSite: process.env.NODE_ENV === 'production' ? "none" : "strict"
     })
     .send({ success: true })
-
 });
 app.post('/logout', (req, res) => {
   res.clearCookie("token", {
